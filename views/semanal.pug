@@ -1,0 +1,170 @@
+doctype html
+html
+    head
+        title= title
+        script(src="https://cdn.jsdelivr.net/npm/chart.js")
+        style.
+            body {
+                background: #fafafa;
+                font-family: 'Roboto', Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+            }
+            .charts-container {
+                display: flex;
+                justify-content: space-around;
+                align-items: flex-start;
+                height: 220px;
+                gap: 24px;
+            }
+            .md-squares-row {
+                display: flex;
+                justify-content: space-around;
+                margin-bottom: 28px;
+                gap: 16px;
+            }
+            .md-square {
+                width: 110px;
+                height: 110px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                border-radius: 12px;
+                box-shadow: 0 2px 8px rgba(60,60,60,0.12), 0 1.5px 4px rgba(60,60,60,0.10);
+                margin: 0 8px;
+                background: #fff;
+                border: none;
+                transition: box-shadow 0.2s;
+            }
+            .md-square span.label {
+                font-size: 15px;
+                font-weight: 500;
+                margin-bottom: 6px;
+                letter-spacing: 0.5px;
+            }
+            .md-square span.value {
+                font-size: 28px;
+                font-weight: 700;
+            }
+            canvas {
+                background: #fff;
+                border-radius: 12px;
+                box-shadow: 0 2px 8px rgba(60,60,60,0.10);
+                border: none;
+            }
+            @media (max-width: 800px) {
+                .charts-container {
+                    flex-direction: column;
+                    align-items: center;
+                    height: auto;
+                    gap: 16px;
+                }
+                .md-squares-row {
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 16px;
+                }
+                canvas {
+                    width: 90vw !important;
+                    max-width: 300px;
+                    height: 180px !important;
+                }
+            }
+            @media (max-width: 500px) {
+                canvas {
+                    width: 95vw !important;
+                    max-width: 98vw;
+                    height: 120px !important;
+                }
+            }
+    body
+        div(class="charts-container")
+            canvas(id="humidityChartSemanal" width="300" height="200")
+            canvas(id="temperatureChartSemanal" width="300" height="200")
+            canvas(id="lightChartSemanal" width="300" height="200")
+        script.
+            const humidityCtxSemanal = document.getElementById('humidityChartSemanal').getContext('2d');
+            const temperatureCtxSemanal = document.getElementById('temperatureChartSemanal').getContext('2d');
+            const lightCtxSemanal = document.getElementById('lightChartSemanal').getContext('2d');
+
+            const humidityChartSemanal = new Chart(humidityCtxSemanal, {
+                type: 'line',
+                data: {
+                    labels: !{JSON.stringify(LabelsSemanal)},
+                    datasets: [{
+                        label: 'Humedad (%)',
+                        data: !{JSON.stringify(humedadDataSemanal)},
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 2,
+                        fill: false
+                    }]
+                },
+                options: {
+                    plugins: { legend: { display: false } },
+                    responsive: false,
+                    maintainAspectRatio: true,
+                    scales: {
+                        y: {
+                            ticks: {
+                                stepSize: 10 
+                            },
+                            min: 0,
+                            max: 100
+                        }
+                    }
+                }
+            });
+
+            const temperatureChartSemanal = new Chart(temperatureCtxSemanal, {
+                type: 'line',
+                data: {
+                    labels: !{JSON.stringify(LabelsSemanal)},
+                    datasets: [{
+                        label: 'Temperatura (°C)',
+                        data: !{JSON.stringify(temperaturaDataSemanal)},
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 2,
+                        fill: false
+                    }]
+                },
+                options: {
+                    plugins: { legend: { display: false } },
+                    responsive: false,
+                    maintainAspectRatio: true,
+                    scales: {
+                        y: {
+                            ticks: {
+                                stepSize: 10 
+                            },
+                            min: 0,
+                            max: 60
+                        }
+                    }
+                }
+            });
+
+            const lightChartSemanal = new Chart(lightCtxSemanal, {
+                type: 'line',
+                data: {
+                    labels: !{JSON.stringify(LabelsSemanal)},
+                    datasets: [{
+                        label: 'Luz',
+                        data: !{JSON.stringify(luzDataSemanal)},
+                        borderColor: 'rgba(255, 206, 86, 1)',
+                        borderWidth: 2,
+                        fill: false
+                    }]
+                },
+                options: {
+                    plugins: { legend: { display: false } },
+                    responsive: false,
+                    maintainAspectRatio: true,
+                    scales: {
+                        y: {
+                            min: 0,
+                            max: 1000
+                        }
+                    }
+                }
+            });

@@ -1,0 +1,86 @@
+doctype html
+html
+    head
+        title= title
+        script(src="https://cdn.jsdelivr.net/npm/chart.js")
+        style.
+            body {
+                background: #fafafa;
+                font-family: 'Roboto', Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                
+            }
+            .md-squares-row {
+                display: flex;
+                justify-content: space-around;
+                margin-bottom: 28px;
+                margin-top: 28px;
+                gap: 16px;
+            }
+            .md-square {
+                width: 110px;
+                height: 110px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                border-radius: 12px;
+                box-shadow: 0 2px 8px rgba(60,60,60,0.12), 0 1.5px 4px rgba(60,60,60,0.10);
+                margin: 0 8px;
+                background: #fff;
+                border: none;
+                transition: box-shadow 0.2s;
+            }
+            .md-square span.label {
+                font-size: 15px;
+                font-weight: 500;
+                margin-bottom: 6px;
+                letter-spacing: 0.5px;
+            }
+            .md-square span.value {
+                font-size: 28px;
+                font-weight: 700;
+            }
+            .md-square.humidity {
+                color: #1976d2;
+                background: #e3f2fd;
+            }
+            .md-square.temperature {
+                color: #d32f2f;
+                background: #ffebee;
+            }
+            .md-square.light {
+                color: #fbc02d;
+                background: #fffde7;
+            }
+            @media (max-width: 800px) {
+                .md-squares-row {
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 16px;
+                }
+                .md-square {
+                    width: 90vw;
+                    max-width: 300px;
+                    height: 80px;
+                }
+            }
+            @media (max-width: 500px) {
+                .md-square {
+                    width: 95vw;
+                    max-width: 98vw;
+                    height: 60px;
+                }
+            }
+    body
+        div(class="md-squares-row")
+            div(class="md-square humidity")
+                span(class="label") Humedad
+                span(class="value") #{humedadActual}%
+            div(class="md-square temperature")
+                span(class="label") Temperatura
+                span(class="value") #{temperaturaActual}°C
+            div(class="md-square light")
+                span(class="label") Luz
+                span(class="value") #{luzActual}

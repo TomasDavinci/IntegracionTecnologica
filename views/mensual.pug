@@ -1,0 +1,192 @@
+doctype html
+html
+    head
+        title= title
+        script(src="https://cdn.jsdelivr.net/npm/chart.js")
+        style.
+            body {
+                background: #fafafa;
+                font-family: 'Roboto', Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+            }
+            .charts-container {
+                display: flex;
+                justify-content: space-around;
+                align-items: flex-start;
+                height: 220px;
+                gap: 24px;
+            }
+            .md-squares-row {
+                display: flex;
+                justify-content: space-around;
+                margin-bottom: 28px;
+                gap: 16px;
+            }
+            .md-square {
+                width: 110px;
+                height: 110px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                border-radius: 12px;
+                box-shadow: 0 2px 8px rgba(60,60,60,0.12), 0 1.5px 4px rgba(60,60,60,0.10);
+                margin: 0 8px;
+                background: #fff;
+                border: none;
+                transition: box-shadow 0.2s;
+            }
+            .md-square span.label {
+                font-size: 15px;
+                font-weight: 500;
+                margin-bottom: 6px;
+                letter-spacing: 0.5px;
+            }
+            .md-square span.value {
+                font-size: 28px;
+                font-weight: 700;
+            }
+            .md-square.humidity {
+                color: #1976d2;
+                background: #e3f2fd;
+            }
+            .md-square.temperature {
+                color: #d32f2f;
+                background: #ffebee;
+            }
+            .md-square.light {
+                color: #fbc02d;
+                background: #fffde7;
+            }
+            canvas {
+                background: #fff;
+                border-radius: 12px;
+                box-shadow: 0 2px 8px rgba(60,60,60,0.10);
+                border: none;
+            }
+            @media (max-width: 800px) {
+                .charts-container {
+                    flex-direction: column;
+                    align-items: center;
+                    height: auto;
+                    gap: 16px;
+                }
+                .md-squares-row {
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 16px;
+                }
+                .md-square {
+                    width: 90vw;
+                    max-width: 300px;
+                    height: 80px;
+                }
+                canvas {
+                    width: 90vw !important;
+                    max-width: 300px;
+                    height: 180px !important;
+                }
+            }
+            @media (max-width: 500px) {
+                .md-square {
+                    width: 95vw;
+                    max-width: 98vw;
+                    height: 60px;
+                }
+                canvas {
+                    width: 95vw !important;
+                    max-width: 98vw;
+                    height: 120px !important;
+                }
+            }
+    body
+        div(class="charts-container")
+            canvas(id="humidityChart" width="300" height="200")
+            canvas(id="temperatureChart" width="300" height="200")
+            canvas(id="lightChart" width="300" height="200")
+        script.
+            const humidityCtx = document.getElementById('humidityChart').getContext('2d');
+            const temperatureCtx = document.getElementById('temperatureChart').getContext('2d');
+            const lightCtx = document.getElementById('lightChart').getContext('2d');
+
+            const humidityChart = new Chart(humidityCtx, {
+                type: 'line',
+                data: {
+                    labels: !{JSON.stringify(Labels)},
+                    datasets: [{
+                        label: 'Humedad (%)',
+                        data: !{JSON.stringify(humedadData)},
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 2,
+                        fill: false
+                    }]
+                },
+                options: {
+                    plugins: { legend: { display: false } },
+                    responsive: false,
+                    maintainAspectRatio: true,
+                    scales: {
+                        y: {
+                            ticks: {
+                                stepSize: 10 
+                            },
+                            min: 0,
+                            max: 100
+                        }
+                    }
+                }
+            });
+
+            const temperatureChart = new Chart(temperatureCtx, {
+                type: 'line',
+                data: {
+                    labels: !{JSON.stringify(Labels)},
+                    datasets: [{
+                        label: 'Temperature (°C)',
+                        data: !{JSON.stringify(temperaturaData)},
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 2,
+                        fill: false
+                    }]
+                },
+                options: {
+                    plugins: { legend: { display: false } },
+                    responsive: false,
+                    maintainAspectRatio: true,
+                    scales: {
+                        y: {
+                            ticks: {
+                                stepSize: 10 
+                            },
+                            min: 0,
+                            max: 60
+                        }
+                    }
+                }
+            });
+
+            const lightChart = new Chart(lightCtx, {
+                type: 'line',
+                data: {
+                    labels: !{JSON.stringify(Labels)},
+                    datasets: [{
+                        label: 'Luz',
+                        data: !{JSON.stringify(luzData)},
+                        borderColor: 'rgba(255, 206, 86, 1)',
+                        borderWidth: 2,
+                        fill: false
+                    }]
+                },
+                options: {
+                    plugins: { legend: { display: false } },
+                    responsive: false,
+                    maintainAspectRatio: true,
+                    scales: {
+                        y: {
+                            min: 0,
+                            max: 24
+                        }
+                    }
+                }
+            });
