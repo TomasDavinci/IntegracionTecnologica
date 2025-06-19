@@ -10,6 +10,7 @@ module.exports = function(collection) {
             const dataMensual = await getDataMensual();
             const dataSemanal = await getDataSemanal();
             const ultimaData = await getUltimaData();
+            console.log(luzMensual)
             res.render('index', {
                 title: 'Medidores',
                 humedadActual: ultimaData.humedad,
@@ -165,17 +166,27 @@ async function getLuzSemanal() {
     for (let i = 1; i < datos.length; i++) {
         const a = datos[i - 1];
         const b = datos[i];
+        const fa = new Date(a.fecha);
+        const fb = new Date(b.fecha);
+
+        if (
+            fa.getFullYear() !== fb.getFullYear() ||
+            fa.getMonth() !== fb.getMonth() ||
+            fa.getDate() !== fb.getDate()
+        ) continue;
+
         if (a.luz === true && b.luz === true) {
-            const min = (b.fecha - a.fecha) / 1000 / 60;
-            const dia = new Date(a.fecha).getDay();
-            horasLuz[dia] += min / 60;
+            const diffMin = (b.fecha - a.fecha) / 1000 / 60;
+            const dia = fa.getDay(); // 0=domingo
+            horasLuz[dia] += diffMin / 60;
         }
     }
 
     return horasLuz.map(h => Math.round(h * 100) / 100);
 }
 
-    async function getLuzMensual() {
+
+async function getLuzMensual() {
     const now = new Date();
     const year = now.getFullYear();
     const month = now.getMonth();
@@ -193,11 +204,19 @@ async function getLuzSemanal() {
     for (let i = 1; i < datos.length; i++) {
         const a = datos[i - 1];
         const b = datos[i];
-        if (a.luz === true && b.luz === true) {
-            const min = (b.fecha - a.fecha) / 1000 / 60;
-            const dia = new Date(a.fecha).getDate() - 1;
-            horasLuz[dia] += min / 60;
-        }
+        const fa = new Date(a.fecha);
+        const fb = new Date(b.fecha);
+
+       if (
+        fa.getFullYear() !== fb.getFullYear() ||
+        fa.getMonth() !== fb.getMonth() ||
+        fa.getDate() !== fb.getDate()
+    ) continue;
+
+    if (a.luz === true && b.luz === true) {
+        const diffMin = (b.fecha - a.fecha) / 1000 / 60;
+        horasLuz[fa.getDate() - 1] += diffMin / 60;
+    }
     }
 
     return horasLuz.map(h => Math.round(h * 100) / 100);
