@@ -5,7 +5,8 @@ module.exports = function(collection) {
 
     router.get('/', async (req, res) => {
         try {
-
+            const luzSemanal = await getLuzSemanal();
+            const luzMensual = await getLuzMensual();
             const dataMensual = await getDataMensual();
             const dataSemanal = await getDataSemanal();
             const ultimaData = await getUltimaData();
@@ -18,10 +19,10 @@ module.exports = function(collection) {
                 LabelsSemanal:dataSemanal.labels,
                 humedadData: dataMensual.humedadData,
                 temperaturaData: dataMensual.temperaturaData,
-                luzData: dataMensual.luzData,
+                luzData: luzMensual,
                 humedadDataSemanal: dataSemanal.humedadData,
                 temperaturaDataSemanal: dataSemanal.temperaturaData,
-                luzDataSemanal: dataSemanal.luzData
+                luzDataSemanal: luzSemanal
             });
         } catch (err) {
             res.status(500).send(err.message);
@@ -146,6 +147,61 @@ module.exports = function(collection) {
     return doc ? { humedad: doc.humedad, luz: doc.luz, temperatura: doc.temperatura } : null;
 
     }
+
+async function getLuzSemanal() {
+    const now = new Date();
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - startOfWeek.getDay());
+    startOfWeek.setHours(0, 0, 0, 0);
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 7);
+
+    const datos = await collection.find({
+        fecha: { $gte: startOfWeek, $lt: endOfWeek }
+    }).sort({ fecha: 1 }).toArray();
+
+    const horasLuz = Array(7).fill(0);
+
+    for (let i = 1; i < datos.length; i++) {
+        const a = datos[i - 1];
+        const b = datos[i];
+        if (a.luz === true && b.luz === true) {
+            const min = (b.fecha - a.fecha) / 1000 / 60;
+            const dia = new Date(a.fecha).getDay();
+            horasLuz[dia] += min / 60;
+        }
+    }
+
+    return horasLuz.map(h => Math.round(h * 100) / 100);
+}
+
+    async function getLuzMensual() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth();
+    const today = now.getDate();
+
+    const startOfMonth = new Date(year, month, 1);
+    const endOfMonth = new Date(year, month, today + 1);
+
+    const datos = await collection.find({
+        fecha: { $gte: startOfMonth, $lt: endOfMonth }
+    }).sort({ fecha: 1 }).toArray();
+
+    const horasLuz = Array(today).fill(0);
+
+    for (let i = 1; i < datos.length; i++) {
+        const a = datos[i - 1];
+        const b = datos[i];
+        if (a.luz === true && b.luz === true) {
+            const min = (b.fecha - a.fecha) / 1000 / 60;
+            const dia = new Date(a.fecha).getDate() - 1;
+            horasLuz[dia] += min / 60;
+        }
+    }
+
+    return horasLuz.map(h => Math.round(h * 100) / 100);
+}
 
     return router;
 };
