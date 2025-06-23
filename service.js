@@ -22,16 +22,19 @@ module.exports = function (collection) {
       res.render('index', {
         title: 'Medidores',
         humedadActual: ultimaData.humedad,
+        humedadSueloActual: ultimaData.humedadSuelo,
         temperaturaActual: ultimaData.temperatura,
         luzActual: ultimaData.luz ? 'ON' : 'OFF',
         Labels: dataMensual.labels,
         LabelsSemanal: dataSemanal.labels,
         humedadData: dataMensual.humedadData,
+        humedadSueloData: dataMensual.humedadSueloData,
         temperaturaData: dataMensual.temperaturaData,
         luzData: luzMensual,
         humedadDataSemanal: dataSemanal.humedadData,
+        humedadSueloDataSemanal: dataSemanal.humedadSueloData,
         temperaturaDataSemanal: dataSemanal.temperaturaData,
-        luzDataSemanal: luzSemanal,
+        luzDataSemanal: luzSemanal
       });
     } catch (err) {
       res.status(500).send(err.message);
@@ -40,11 +43,15 @@ module.exports = function (collection) {
 
   router.post('/', async (req, res) => {
     try {
-      const { humedad, temperatura, luz } = req.body;
+      console.log(req.body)
+      const { humedad, humedad_suelo, temperatura, luz } = req.body;
       const now = new Date();
-      const localDate = new Date(now.getTime() - 3 * 60 * 60000); // UTC-3
+      const localDate = new Date(now.getTime() - 3 * 60 * 60000);
 
-      await collection.insertOne({ humedad, temperatura, luz, fecha: localDate });
+      let humedad_sueloF = parseInt(100 * (1 - humedad_suelo / 4095));
+      let luzF = luz == 1 ? false : true;
+
+      await collection.insertOne({ humedad, humedad_suelo: humedad_sueloF, temperatura, luz:luzF, fecha: localDate });
       res.status(201).json({ message: 'Datos guardados' });
     } catch (err) {
       res.status(500).json({ error: 'Error DB', mensaje: err.message });
@@ -63,17 +70,19 @@ module.exports = function (collection) {
           _id: { day: { $dayOfMonth: '$fecha' } },
           fecha: { $first: '$fecha' },
           avgHumidity: { $avg: '$humedad' },
+          avgSoilHumidity: { $avg: '$humedad_suelo' },
           avgTemperature: { $avg: '$temperatura' },
-          avgLight: { $avg: '$luz' },
+          avgLight: { $avg: '$luz' }
         },
       },
-      { $sort: { '_id.day': 1 } },
+      { $sort: { '_id.day': 1 } }
     ];
 
     const results = await collection.aggregate(pipeline).toArray();
 
     const labels = [];
     const humedadData = [];
+    const humedadSueloData = [];
     const temperaturaData = [];
     const luzData = [];
 
@@ -81,11 +90,12 @@ module.exports = function (collection) {
       labels.push(String(d));
       const dayData = results.find((r) => r._id.day === d);
       humedadData.push(dayData ? Math.round(dayData.avgHumidity) : null);
+      humedadSueloData.push(dayData ? Math.round(dayData.avgSoilHumidity) : null);
       temperaturaData.push(dayData ? Math.round(dayData.avgTemperature) : null);
       luzData.push(dayData ? Math.round(dayData.avgLight) : null);
     }
 
-    return { labels, humedadData, temperaturaData, luzData };
+    return { labels, humedadData, humedadSueloData, temperaturaData, luzData };
   }
 
   async function getDataSemanal() {
@@ -103,8 +113,9 @@ module.exports = function (collection) {
         $group: {
           _id: { dia: { $dayOfWeek: '$fecha' } },
           avgHumidity: { $avg: '$humedad' },
+          avgSoilHumidity: { $avg: '$humedad_suelo' },
           avgTemperature: { $avg: '$temperatura' },
-          avgLight: { $avg: '$luz' },
+          avgLight: { $avg: '$luz' }
         },
       },
     ];
@@ -114,17 +125,19 @@ module.exports = function (collection) {
     const map = { 1: 0, 2: 1, 3: 2, 4: 3, 5: 4, 6: 5, 7: 6 };
     const labels = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
     const humedadData = Array(7).fill(null);
+    const humedadSueloData = Array(7).fill(null);
     const temperaturaData = Array(7).fill(null);
     const luzData = Array(7).fill(null);
 
     for (const r of results) {
       const idx = map[r._id.dia];
       humedadData[idx] = Math.round(r.avgHumidity);
+      humedadSueloData[idx] = Math.round(r.avgSoilHumidity);
       temperaturaData[idx] = Math.round(r.avgTemperature);
       luzData[idx] = Math.round(r.avgLight);
     }
 
-    return { labels, humedadData, temperaturaData, luzData };
+    return { labels, humedadData, humedadSueloData, temperaturaData, luzData };
   }
 
   async function getUltimaData() {
@@ -132,6 +145,7 @@ module.exports = function (collection) {
     if (!doc) return null;
     return {
       humedad: doc.humedad,
+      humedadSuelo: doc.humedad_suelo,
       luz: doc.luz,
       temperatura: doc.temperatura,
     };

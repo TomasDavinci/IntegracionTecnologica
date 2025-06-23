@@ -103,10 +103,12 @@ html
     body
         div(class="charts-container")
             canvas(id="humidityChart" width="300" height="200")
+            canvas(id="soilHumidityChart" width="300" height="200")
             canvas(id="temperatureChart" width="300" height="200")
             canvas(id="lightChart" width="300" height="200")
         script.
             const humidityCtx = document.getElementById('humidityChart').getContext('2d');
+            const soilHumidityCtx = document.getElementById('soilHumidityChart').getContext('2d');
             const temperatureCtx = document.getElementById('temperatureChart').getContext('2d');
             const lightCtx = document.getElementById('lightChart').getContext('2d');
 
@@ -117,6 +119,34 @@ html
                     datasets: [{
                         label: 'Humedad (%)',
                         data: !{JSON.stringify(humedadData)},
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 2,
+                        fill: false
+                    }]
+                },
+                options: {
+                    plugins: { legend: { display: false } },
+                    responsive: false,
+                    maintainAspectRatio: true,
+                    scales: {
+                        y: {
+                            ticks: {
+                                stepSize: 10 
+                            },
+                            min: 0,
+                            max: 100
+                        }
+                    }
+                }
+            });
+
+            const soilHumidityChart = new Chart(soilHumidityCtx, {
+                type: 'line',
+                data: {
+                    labels: !{JSON.stringify(Labels)},
+                    datasets: [{
+                        label: 'Humedad (%)',
+                        data: !{JSON.stringify(humedadSueloData)},
                         borderColor: 'rgba(54, 162, 235, 1)',
                         borderWidth: 2,
                         fill: false

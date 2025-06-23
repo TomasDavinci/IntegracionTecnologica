@@ -81,10 +81,12 @@ html
     body
         div(class="charts-container")
             canvas(id="humidityChartSemanal" width="300" height="200")
+            canvas(id="soilHumidityChartSemanal" width="300" height="200")
             canvas(id="temperatureChartSemanal" width="300" height="200")
             canvas(id="lightChartSemanal" width="300" height="200")
         script.
             const humidityCtxSemanal = document.getElementById('humidityChartSemanal').getContext('2d');
+            const soilHumidityCtxSemanal = document.getElementById('soilHumidityChartSemanal').getContext('2d');
             const temperatureCtxSemanal = document.getElementById('temperatureChartSemanal').getContext('2d');
             const lightCtxSemanal = document.getElementById('lightChartSemanal').getContext('2d');
 
@@ -95,6 +97,34 @@ html
                     datasets: [{
                         label: 'Humedad (%)',
                         data: !{JSON.stringify(humedadDataSemanal)},
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 2,
+                        fill: false
+                    }]
+                },
+                options: {
+                    plugins: { legend: { display: false } },
+                    responsive: false,
+                    maintainAspectRatio: true,
+                    scales: {
+                        y: {
+                            ticks: {
+                                stepSize: 10 
+                            },
+                            min: 0,
+                            max: 100
+                        }
+                    }
+                }
+            });
+
+            const soilHumidityChartSemanal = new Chart(soilHumidityCtxSemanal, {
+                type: 'line',
+                data: {
+                    labels: !{JSON.stringify(LabelsSemanal)},
+                    datasets: [{
+                        label: 'Humedad (%)',
+                        data: !{JSON.stringify(humedadSueloDataSemanal)},
                         borderColor: 'rgba(54, 162, 235, 1)',
                         borderWidth: 2,
                         fill: false
